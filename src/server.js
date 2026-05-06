@@ -1,30 +1,37 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+
+const authRoutes = require("./routes/authRoutes");
+const clientRoutes = require("./routes/clientRoutes");
+const pool = require("./db/db");
 
 const app = express();
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/clients", clientRoutes);
+
+// Test route
 app.get("/", (req, res) => {
   res.json({ message: "Trainer business API is running" });
 });
 
+
+// Start server
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-const pool = require("./db/db");
-
+// DB connection
 pool
   .connect()
   .then(() => console.log("Connected to PostgreSQL"))
   .catch((err) => console.error("DB connection error:", err));
-
-  //import the authRoutes
-const authRoutes = require("./routes/authRoutes");
-//Any route starting with /api/auth should go to authRoutes
-app.use("/api/auth", authRoutes);
