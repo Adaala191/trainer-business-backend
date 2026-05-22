@@ -106,6 +106,7 @@ exports.updateClient = async (req, res) => {
        RETURNING *`,
       [name, email, phone, age, weight, country, clientId, trainerId]
     );
+    
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Client not found" });

@@ -6,6 +6,9 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const clientRoutes = require("./routes/clientRoutes");
 const pool = require("./db/db");
+const videoCategoryRoutes = require("./routes/videoCategoryRoutes");
+const videoRoutes = require("./routes/videoRoutes");
+
 
 const app = express();
 
@@ -16,6 +19,8 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
+app.use("/api/video-categories", videoCategoryRoutes);
+app.use("/api/videos", videoRoutes);
 
 // Test route
 app.get("/", (req, res) => {
