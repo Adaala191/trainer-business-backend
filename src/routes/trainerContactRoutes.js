@@ -5,39 +5,31 @@ const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
 const {
-  createCategory,
-  getCategories,
-  patchCategory,
-  deleteCategory,
-} = require("../controllers/videoCategoryController");
+  createContactInfo,
+  getContactInfo,
+  patchContactInfo,
+} = require("../controllers/trainerContactController");
 
 
 router.post(
-  "/",
-  authMiddleware,
-  roleMiddleware("trainer"),
-  createCategory,
+    "/",
+    authMiddleware,
+    roleMiddleware("trainer"),
+    createContactInfo
 );
 
 router.get(
   "/",
   authMiddleware,
   roleMiddleware("trainer"),
-  getCategories
+  getContactInfo
 );
 
 router.patch(
-  "/:id",
+  "/",
   authMiddleware,
   roleMiddleware("trainer"),
-  patchCategory
-);
-
-router.delete(
-  "/:id",
-  authMiddleware,
-  roleMiddleware("trainer"),
-  deleteCategory
+  patchContactInfo
 );
 
 module.exports = router;

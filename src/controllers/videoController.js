@@ -180,3 +180,153 @@ exports.updateWatchedStatus = async (req, res) => {
     });
   }
 };
+
+
+exports.getVideos = async (req, res) => {
+  try {
+    const trainerId = req.user.id;
+
+    const result = await pool.query(
+      `SELECT videos.*, video_categories.name AS category_name
+       FROM videos
+       LEFT JOIN video_categories
+       ON videos.category_id = video_categories.id
+       WHERE videos.trainer_id = $1
+       ORDER BY videos.created_at DESC`,
+      [trainerId]
+    );
+
+    res.json({
+      videos: result.rows,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+
+exports.patchVideo = async (req, res) => {
+  try {
+    const videoId = req.params.id;
+    const trainerId = req.user.id;
+
+    const { title, description, video_url, category_id } = req.body;
+
+    const videoResult = await pool.query(
+      "SELECT * FROM videos WHERE id = $1 AND trainer_id = $2",
+      [videoId, trainerId]
+    );
+
+    if (videoResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Video not found",
+      });
+    }
+
+    if (category_id !== undefined && category_id !== null) {
+      const categoryResult = await pool.query(
+        "SELECT * FROM video_categories WHERE id = $1 AND trainer_id = $2",
+        [category_id, trainerId]
+      );
+
+      if (categoryResult.rows.length === 0) {
+        return res.status(404).json({
+          message: "Category not found",
+        });
+      }
+    }
+
+    const fields = [];
+    const values = [];
+    let index = 1;
+
+    if (title !== undefined) {
+      fields.push(`title = $${index++}`);
+      values.push(title);
+    }
+
+    if (description !== undefined) {
+      fields.push(`description = $${index++}`);
+      values.push(description);
+    }
+
+    if (video_url !== undefined) {
+      fields.push(`video_url = $${index++}`);
+      values.push(video_url);
+    }
+
+    if (category_id !== undefined) {
+      fields.push(`category_id = $${index++}`);
+      values.push(category_id);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({
+        message: "No data provided to update",
+      });
+    }
+
+    const query = `
+      UPDATE videos
+      SET ${fields.join(", ")}
+      WHERE id = $${index++} AND trainer_id = $${index}
+      RETURNING *
+    `;
+
+    values.push(videoId, trainerId);
+
+    const result = await pool.query(query, values);
+
+    res.json({
+      message: "Video updated successfully",
+      video: result.rows[0],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+
+exports.deleteVideo = async (req, res) => {
+  try {
+    const videoId = req.params.id;
+    const trainerId = req.user.id;
+
+    const videoResult = await pool.query(
+      "SELECT * FROM videos WHERE id = $1 AND trainer_id = $2",
+      [videoId, trainerId]
+    );
+
+    if (videoResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Video not found",
+      });
+    }
+
+    await pool.query(
+      "DELETE FROM client_videos WHERE video_id = $1",
+      [videoId]
+    );
+
+    const result = await pool.query(
+      "DELETE FROM videos WHERE id = $1 AND trainer_id = $2 RETURNING *",
+      [videoId, trainerId]
+    );
+
+    res.json({
+      message: "Video deleted successfully",
+      video: result.rows[0],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};

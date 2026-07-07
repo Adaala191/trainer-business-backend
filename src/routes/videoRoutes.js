@@ -9,6 +9,9 @@ const {
   assignVideoToClient,
   getClientVideos,
   updateWatchedStatus,
+  getVideos,
+  patchVideo,
+  deleteVideo,
 } = require("../controllers/videoController");
 
 
@@ -38,6 +41,27 @@ router.patch(
   "/client-videos/:assignmentId/watched",
   authMiddleware,
   updateWatchedStatus
+);
+
+router.get(
+  "/",
+  authMiddleware,
+  roleMiddleware("trainer"),
+  getVideos
+);
+
+router.patch(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("trainer"),
+  patchVideo
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("trainer"),
+  deleteVideo
 );
 
 module.exports = router;

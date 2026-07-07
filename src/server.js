@@ -8,6 +8,7 @@ const clientRoutes = require("./routes/clientRoutes");
 const pool = require("./db/db");
 const videoCategoryRoutes = require("./routes/videoCategoryRoutes");
 const videoRoutes = require("./routes/videoRoutes");
+const trainerContactRoutes = require("./routes/trainerContactRoutes");
 
 
 const app = express();
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/video-categories", videoCategoryRoutes);
 app.use("/api/videos", videoRoutes);
+app.use("/api/trainer-contact", trainerContactRoutes);
 
 // Test route
 app.get("/", (req, res) => {
